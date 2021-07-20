@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
+import { ReactReduxContext } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeForm, changeField } from '../../modules/auth';
+import { initializeForm, changeField, register } from '../../modules/auth';
 import AuthForm from './AuthForm';
-
-// 24.2 979
 
 const RegisterForm = (props) => {
   const dispatch = useDispatch();
-  const { form } = useSelector(({ auth }) => ({ form: auth.register }));
+  const { form, auth, authError } = useSelector(({ auth }) => ({
+    form: auth.register,
+    auth: auth.auth,
+    authError: auth.authError,
+  }));
 
   const onChange = (e) => {
     const { value, name } = e.target;
@@ -21,11 +24,28 @@ const RegisterForm = (props) => {
   };
   const onSubmit = (e) => {
     e.preventDefault();
+    const { username, password, passwordConfirm } = form;
+    if (password !== passwordConfirm) {
+      return;
+    }
+    dispatch(register({ username, password }));
   };
 
   useEffect(() => {
-    dispatch(initializeForm('register'), [dispatch]);
-  });
+    dispatch(initializeForm('register'));
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (authError) {
+      console.log('오류 발생');
+      console.log(authError);
+      return;
+    }
+    if (auth) {
+      console.log('회원가입 성공');
+      console.log(auth);
+    }
+  }, [auth, authError]);
 
   return (
     <AuthForm
